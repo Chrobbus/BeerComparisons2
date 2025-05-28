@@ -39,23 +39,31 @@ def scrape_nyjavinbudin(url):
 
         return None
     except Exception as e:
+        print(f"⚠️ Nýja Vínbúðin ERROR: {e}")
         return None
 
-# Scraper for Smáríkið using API
+# Scraper for Smáríkið using API (with debug logging)
 def scrape_smarikid_api(product_id):
     try:
         response = requests.get("https://smarikid.is/api/products", timeout=10)
         response.raise_for_status()
         products = response.json()
 
+        # Debug output
+        for product in products:
+            print(f"Product ID: {product.get('_id')} | Title: {product.get('title')}")
+
         for product in products:
             if product.get("_id") == product_id:
+                print(f"✅ MATCHED: {product.get('title')}")
                 price = float(product.get("price", 0))
                 unit_price = price / 12.0
                 return price, unit_price
 
+        print(f"❌ Product ID {product_id} not found in API results.")
         return None, None
     except Exception as e:
+        print(f"⚠️ API ERROR: {e}")
         return None, None
 
 # Filter entries for selected beer
