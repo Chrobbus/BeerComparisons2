@@ -10,7 +10,7 @@ beer_entries = [
     {"name": "Gull Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-500-ml-dos/"},
     {"name": "Gull Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-330-ml-dos/"},
     {"name": "Víking Lite 500ml", "store": "Smáríkið", "query": "Víking Lite 500ml"},
-    {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "Gull Lite 500ml"},
+    {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "Gull Lite"},
     {"name": "Víking Lite 330ml", "store": "Smáríkið", "query": "Víking Lite 330ml"},
 ]
 
