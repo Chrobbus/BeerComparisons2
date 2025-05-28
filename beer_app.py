@@ -1,32 +1,55 @@
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
-# Step 1: Define beers with correct URLs
-beers = [
-    {"name": "Víking Lite 500ml", "url": "https://nyjavinbudin.is/vara/viking-lite/"},
-    {"name": "Egils Gull 500ml", "url": "https://nyjavinbudin.is/vara/egils-gull-500-ml/"},
+# List of beers across stores
+beer_entries = [
+    {"name": "Víking Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/viking-lite/"},
+    {"name": "Egils Gull 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/egils-gull-500-ml/"},
+    # Later add more stores here
 ]
 
-# Step 2: UI Dropdown
-beer_names = [beer["name"] for beer in beers]
-selected_beer_name = st.selectbox("Select a beer to check price:", beer_names)
-selected_beer = next(beer for beer in beers if beer["name"] == selected_beer_name)
+# Dropdown to select beer
+unique_beers = sorted(list(set(entry["name"] for entry in beer_entries)))
+selected_beer = st.selectbox("Select a beer:", unique_beers)
 
-# Step 3: Scraper
+# Function to scrape price (discount-aware)
 def scrape_nyjavinbudin(url):
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
+        # Try discount price first
+        ins_tag = soup.find("ins")
+        if ins_tag:
+            price_span = ins_tag.find("span", class_="woocommerce-Price-amount")
+            if price_span:
+                return price_span.text.strip()
+
+        # Fallback to regular price
         price_span = soup.find("span", class_="woocommerce-Price-amount")
         if price_span:
             return price_span.text.strip()
+
         return "Price not found"
     except Exception as e:
         return f"Error: {e}"
 
-# Step 4: Show result
-price = scrape_nyjavinbudin(selected_beer["url"])
-st.write(f"**{selected_beer_name}** at Nýja Vínbúðin: {price}")
+# Filter beer entries that match selected beer
+filtered_entries = [entry for entry in beer_entries if entry["name"] == selected_beer]
+
+# Collect prices for all stores
+data = []
+for entry in filtered_entries:
+    price = scrape_nyjavinbudin(entry["url"])
+    data.append({
+        "Store": entry["store"],
+        "Price": price
+    })
+
+# Display results in a table
+df = pd.DataFrame(data)
+st.write(f"### Prices for **{selected_beer}**")
+st.table(df)
