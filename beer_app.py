@@ -9,9 +9,9 @@ beer_entries = [
     {"name": "Víking Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/viking-lite-330ml/"},
     {"name": "Gull Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-500-ml-dos/"},
     {"name": "Gull Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-330-ml-dos/"},
-    {"name": "Víking Lite 500ml", "store": "Smáríkið", "query": "Víking Lite 500ml"},
-    {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "Gull Lite 500ml"},
-    {"name": "Víking Lite 330ml", "store": "Smáríkið", "query": "Víking Lite 330ml"},
+    {"name": "Víking Lite 500ml", "store": "Smáríkið", "query": "65577db2c98d14ede00b576d"},
+    {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "65679ca2988512fb68f35bb5"},
+    {"name": "Víking Lite 330ml", "store": "Smáríkið", "query": "67f009370e72d7e1be83155b"},
 ]
 
 # Dropdown to select beer
@@ -42,9 +42,9 @@ def scrape_nyjavinbudin(url):
         print(f"⚠️ Nýja Vínbúðin ERROR: {e}")
         return None
 
-# Scraper for Smáríkið using correct "name" field from API
+# Scraper for Smáríkið using product ID to find discounted price
 @st.cache_data
-def get_smarikid_price(query):
+def get_smarikid_price(product_id):
     try:
         url = "https://smarikid.is/api/products"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -52,11 +52,10 @@ def get_smarikid_price(query):
         data = response.json()
 
         for product in data:
-            if query.lower() in product.get("name", "").lower():
-                base_price = product.get("base_price")
-                sale_price = product.get("sale_price", base_price)
+            if product.get("_id") == product_id:
+                sale_price = product.get("sale_price") or product.get("base_price")
                 if sale_price:
-                    unit_price = round(sale_price / 12)
+                    unit_price = round(sale_price / 12, 2)
                     return sale_price, unit_price
         return None, None
     except Exception as e:
@@ -78,8 +77,8 @@ for entry in filtered_entries:
             full_pack_price = unit_price * 12
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
     elif store == "Smáríkið":
-        query = entry["query"]
-        full_price, unit_price = get_smarikid_price(query)
+        product_id = entry["query"]
+        full_price, unit_price = get_smarikid_price(product_id)
         if full_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
