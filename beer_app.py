@@ -10,8 +10,8 @@ beer_entries = [
     {"name": "Gull Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-500-ml-dos/"},
     {"name": "Gull Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-330-ml-dos/"},
     {"name": "Víking Lite 500ml", "store": "Smáríkið", "query": "Víking Lite 500ml"},
-    {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "65679ca2988512fb68f35bb5"},
-    {"name": "Víking Lite 330ml", "store": "Smáríkið", "query": "67f009370e72d7e1be83155b"},
+    {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "Gull Lite 500ml"},
+    {"name": "Víking Lite 330ml", "store": "Smáríkið", "query": "Víking Lite 330ml"},
 ]
 
 # Dropdown to select beer
@@ -42,7 +42,7 @@ def scrape_nyjavinbudin(url):
         print(f"⚠️ Nýja Vínbúðin ERROR: {e}")
         return None
 
-# Scraper for Smáríkið using product ID to find discounted price
+# Scraper for Smáríkið using name matching
 @st.cache_data
 def get_smarikid_price(product_name):
     try:
@@ -50,9 +50,10 @@ def get_smarikid_price(product_name):
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
         data = response.json()
+
         product_list = data.get("products", [])
 
-        for product in data:
+        for product in product_list:
             name = product.get("name", "").strip()
             if name == product_name:
                 base_price = product.get("base_price")
@@ -65,7 +66,7 @@ def get_smarikid_price(product_name):
         return None, None
 
     except Exception as e:
-        print(f"⚠️ API ERROR: {e}")
+        print(f"⚠️ Smáríkið API ERROR: {e}")
         return None, None
 
 # Filter entries for selected beer
@@ -83,8 +84,8 @@ for entry in filtered_entries:
             full_pack_price = unit_price * 12
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
     elif store == "Smáríkið":
-        product_id = entry["query"]
-        full_price, unit_price = get_smarikid_price(product_id)
+        product_name = entry["query"]
+        full_price, unit_price = get_smarikid_price(product_name)
         if full_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
