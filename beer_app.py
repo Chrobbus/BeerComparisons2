@@ -9,7 +9,7 @@ beer_entries = [
     {"name": "Víking Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/viking-lite-330ml/"},
     {"name": "Gull Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-500-ml-dos/"},
     {"name": "Gull Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-330-ml-dos/"},
-    {"name": "Víking Lite 500ml", "store": "Smáríkið", "query": "65577db2c98d14ede00b576d"},
+    {"name": "Víking Lite 500ml", "store": "Smáríkið", "query": "Víking Lite 500ml"},
     {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "65679ca2988512fb68f35bb5"},
     {"name": "Víking Lite 330ml", "store": "Smáríkið", "query": "67f009370e72d7e1be83155b"},
 ]
@@ -44,7 +44,7 @@ def scrape_nyjavinbudin(url):
 
 # Scraper for Smáríkið using product ID to find discounted price
 @st.cache_data
-def get_smarikid_price(product_id):
+def get_smarikid_price(product_name):
     try:
         url = "https://smarikid.is/api/products"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -52,14 +52,19 @@ def get_smarikid_price(product_id):
         data = response.json()
 
         for product in data:
-            if product.get("_id") == product_id:
-                sale_price = product.get("sale_price") or product.get("base_price")
+            name = product.get("name", "").strip()
+            if name == product_name:
+                base_price = product.get("base_price")
+                sale_price = product.get("sale_price", base_price)
                 if sale_price:
                     unit_price = round(sale_price / 12, 2)
                     return sale_price, unit_price
+
+        print(f"❌ No match for '{product_name}' in API.")
         return None, None
+
     except Exception as e:
-        print(f"⚠️ Smáríkið API ERROR: {e}")
+        print(f"⚠️ API ERROR: {e}")
         return None, None
 
 # Filter entries for selected beer
