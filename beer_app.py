@@ -42,7 +42,7 @@ def scrape_nyjavinbudin(url):
         print(f"⚠️ Nýja Vínbúðin ERROR: {e}")
         return None
 
-# Scraper for Smáríkið using name matching
+# Scraper for Smáríkið using name matching (uses base_price if sale_price is missing or not lower)
 @st.cache_data
 def get_smarikid_price(product_name):
     try:
@@ -57,10 +57,11 @@ def get_smarikid_price(product_name):
             name = product.get("name", "").strip()
             if name == product_name:
                 base_price = product.get("base_price")
-                sale_price = product.get("sale_price", base_price)
-                if sale_price:
-                    unit_price = round(sale_price / 12, 2)
-                    return sale_price, unit_price
+                sale_price = product.get("sale_price")
+                final_price = sale_price if sale_price and sale_price < base_price else base_price
+                if final_price:
+                    unit_price = round(final_price / 12, 2)
+                    return final_price, unit_price
 
         print(f"❌ No match for '{product_name}' in API.")
         return None, None
