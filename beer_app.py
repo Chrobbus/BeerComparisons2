@@ -42,7 +42,7 @@ def scrape_nyjavinbudin(url):
         print(f"⚠️ Nýja Vínbúðin ERROR: {e}")
         return None
 
-# Scraper for Smáríkið using name matching from API
+# Scraper for Smáríkið using correct "name" field from API
 @st.cache_data
 def get_smarikid_price(query):
     try:
