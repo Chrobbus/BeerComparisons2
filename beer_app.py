@@ -41,7 +41,8 @@ def scrape_nyjavinbudin(url):
     except Exception as e:
         return None
 
-# Scraper for Smáríkið (price for 12-pack)
+# Updated scraper for Smáríkið
+
 def scrape_smarikid(url):
     try:
         response = requests.get(url, timeout=10)
@@ -67,15 +68,15 @@ data = []
 for entry in filtered_entries:
     store = entry["store"]
     url = entry["url"]
-    
+
     if store == "Nýja Vínbúðin":
         unit_price = scrape_nyjavinbudin(url)
-        if unit_price:
+        if unit_price is not None:
             full_pack_price = unit_price * 12
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
     elif store == "Smáríkið":
         full_price, unit_price = scrape_smarikid(url)
-        if full_price and unit_price:
+        if full_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
 # Display results
