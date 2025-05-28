@@ -9,9 +9,9 @@ beer_entries = [
     {"name": "Víking Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/viking-lite-330ml/"},
     {"name": "Gull Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-500-ml-dos/"},
     {"name": "Gull Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-330-ml-dos/"},
-    {"name": "Víking Lite 500ml", "store": "Smáríkið", "url": "https://smarikid.is/product/65577db2c98d14ede00b576d"},
-    {"name": "Gull Lite 500ml", "store": "Smáríkið", "url": "https://smarikid.is/product/65679ca2988512fb68f35bb5"},
-    {"name": "Víking Lite 330ml", "store": "Smáríkið", "url": "https://smarikid.is/product/67f009370e72d7e1be83155b"},
+    {"name": "Víking Lite 500ml", "store": "Smáríkið", "id": "65577db2c98d14ede00b576d"},
+    {"name": "Gull Lite 500ml", "store": "Smáríkið", "id": "65679ca2988512fb68f35bb5"},
+    {"name": "Víking Lite 330ml", "store": "Smáríkið", "id": "67f009370e72d7e1be83155b"},
 ]
 
 # Dropdown to select beer
@@ -41,20 +41,18 @@ def scrape_nyjavinbudin(url):
     except Exception as e:
         return None
 
-# Updated scraper for Smáríkið
-
-def scrape_smarikid(url):
+# Scraper for Smáríkið using API
+def scrape_smarikid_api(product_id):
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get("https://smarikid.is/api/products", timeout=10)
         response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
+        products = response.json()
 
-        h2_tag = soup.find("h2", class_="text-xl  md:text-3xl font-medium")
-        if h2_tag:
-            price_text = h2_tag.text.strip().replace("Kr.", "").replace("kr.", "").replace("kr", "").replace("\xa0", "").replace(".", "").replace(",", ".")
-            full_pack_price = float(price_text)
-            unit_price = full_pack_price / 12.0
-            return full_pack_price, unit_price
+        for product in products:
+            if product.get("_id") == product_id:
+                price = float(product.get("price", 0))
+                unit_price = price / 12.0
+                return price, unit_price
 
         return None, None
     except Exception as e:
@@ -67,15 +65,16 @@ filtered_entries = [entry for entry in beer_entries if entry["name"] == selected
 data = []
 for entry in filtered_entries:
     store = entry["store"]
-    url = entry["url"]
 
     if store == "Nýja Vínbúðin":
+        url = entry["url"]
         unit_price = scrape_nyjavinbudin(url)
         if unit_price is not None:
             full_pack_price = unit_price * 12
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
     elif store == "Smáríkið":
-        full_price, unit_price = scrape_smarikid(url)
+        product_id = entry["id"]
+        full_price, unit_price = scrape_smarikid_api(product_id)
         if full_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
