@@ -50,6 +50,7 @@ def get_smarikid_price(product_name):
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
         data = response.json()
+        product_list = data.get("products", [])
 
         for product in data:
             name = product.get("name", "").strip()
