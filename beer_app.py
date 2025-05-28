@@ -6,8 +6,9 @@ import pandas as pd
 # List of beers across stores
 beer_entries = [
     {"name": "Víking Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/viking-lite/"},
-    {"name": "Egils Gull 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/egils-gull-500-ml/"},
-    # Later add more stores here
+    {"name": "Víking Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/viking-lite-330ml/"},
+    {"name": "Gull Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-500-ml-dos/"},
+    {"name": "Gull Lite 330ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/gull-lite-330-ml-dos/"},
 ]
 
 # Dropdown to select beer
