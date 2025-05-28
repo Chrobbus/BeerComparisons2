@@ -47,10 +47,10 @@ def scrape_smarikid(url):
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        
-        price_div = soup.find("p", class_="product-price")
-        if price_div:
-            price_text = price_div.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
+
+        h2_tag = soup.find("h2", class_="text-xl  md:text-3xl font-medium")
+        if h2_tag:
+            price_text = h2_tag.text.strip().replace("Kr.", "").replace("kr.", "").replace("kr", "").replace("\xa0", "").replace(".", "").replace(",", ".")
             full_pack_price = float(price_text)
             unit_price = full_pack_price / 12.0
             return full_pack_price, unit_price
