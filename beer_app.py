@@ -270,8 +270,3 @@ if data:
     st.table(df)
 else:
     st.write("No price data available.")
-
-# Display results
-df = pd.DataFrame(data)
-st.write(f"### Prices for **{selected_beer}**")
-st.table(df)
