@@ -18,6 +18,10 @@ beer_entries = [
     {"name": "Gull Lite 330ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/gull-lite-4-4-12-x-330ml"},
     {"name": "Víking Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Viking-Lite-12-x-500ml/p/453945"},
     {"name": "Gull Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Gull-Lite-12-x-500ml/p/453613"},
+    {"name": "Gull Lite 500ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/gull-lite-500-ml-12pk-158102"},
+    {"name": "Gull Lite 330ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/gull-lite-330ml-12pk-158111"},
+    {"name": "Víking Lite 500ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/viking-lite-500-ml-12pk-157969"},
+    {"name": "Víking Lite 330ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/viking-lite-330-ml-12pk-157965"},
 ]
 
 # Dropdown to select beer
@@ -96,7 +100,6 @@ def scrape_heimkaup(url):
         return None, None
 
 # Scraper for Costco
-
 def scrape_costco(url):
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -104,7 +107,6 @@ def scrape_costco(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Look for any span with kr. inside and extract the first match
         price_span = soup.find("span", string=lambda text: text and "kr." in text)
         if price_span:
             full_pack_text = price_span.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
@@ -114,6 +116,21 @@ def scrape_costco(url):
         return None, None
     except Exception as e:
         print(f"⚠️ Costco ERROR: {e}")
+        return None, None
+
+# Scraper for Hagkaup (Veigar)
+def scrape_veigar(url):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        price_tag = soup.find("span", string=lambda text: text and "kr." in text)
+        if price_tag:
+            price_text = price_tag.text.strip().replace(".", "").replace("kr", "").replace(" ", "")
+            full_pack_price = int(price_text)
+            unit_price = round(full_pack_price / 12, 2)
+            return full_pack_price, unit_price
+    except Exception as e:
+        print(f"⚠️ Hagkaup ERROR: {e}")
         return None, None
 
 # Filter entries for selected beer
@@ -143,6 +160,11 @@ for entry in filtered_entries:
     elif store == "Costco":
         url = entry["url"]
         full_pack_price, unit_price = scrape_costco(url)
+        if full_pack_price is not None and unit_price is not None:
+            data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
+    elif store == "Hagkaup":
+        url = entry["url"]
+        full_pack_price, unit_price = scrape_veigar(url)
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
