@@ -18,8 +18,8 @@ beer_entries = [
     {"name": "Gull Lite 330ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/gull-lite-4-4-12-x-330ml"},
     {"name": "Víking Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Viking-Lite-12-x-500ml/p/453945"},
     {"name": "Gull Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Gull-Lite-12-x-500ml/p/453613"},
-    {"name": "Víking Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://veigar.eu/product/viking-lite-500ml/"},
-    {"name": "Gull Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://veigar.eu/product/gull-lite-500ml/"},
+    {"name": "Víking Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://www.veigar.eu/vara/viking-lite-500-ml-12pk-157969"},
+    {"name": "Gull Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://www.veigar.eu/vara/gull-lite-500-ml-12pk-157967"},
 ]
 
 # Dropdown to select beer
@@ -124,12 +124,16 @@ def scrape_veigar(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
-        price_element = soup.find("bdi")
-        if price_element:
-            price_text = price_element.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
-            full_pack_price = float(price_text)
-            unit_price = round(full_pack_price / 12, 2)
-            return full_pack_price, unit_price
+        price_paragraphs = soup.find_all("p")
+        for p in price_paragraphs:
+            if p.text.strip().startswith("Verð:"):
+                price_span = p.find("span")
+                if price_span:
+                    price_text = price_span.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
+                    full_pack_price = float(price_text)
+                    unit_price = round(full_pack_price / 12, 2)
+                    return full_pack_price, unit_price
+
         return None, None
     except Exception as e:
         print(f"⚠️ Veigar ERROR: {e}")
