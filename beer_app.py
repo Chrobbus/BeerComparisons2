@@ -256,10 +256,11 @@ if data:
     # Convert to DataFrame
     df = pd.DataFrame(data)
 
-    df = df.sort_values(by="12-pack Price")
-
-    # Extract numeric value from "12-pack Price" column for comparison
+    # Extract numeric value from "12-pack Price" column for sorting/comparison
     df["12-pack Numeric"] = df["12-pack Price"].str.replace(" kr", "").str.replace(".", "").astype(int)
+
+    # Sort by numeric price
+    df = df.sort_values(by="12-pack Numeric")
 
     # Find the cheapest price
     cheapest = df["12-pack Numeric"].min()
@@ -269,11 +270,14 @@ if data:
         lambda x: "Cheapest 🥇" if x == cheapest else f"+{int(round((x - cheapest) / cheapest * 100))}%"
     )
 
-    # Drop the numeric helper column
+    # Drop the helper column
     df.drop(columns=["12-pack Numeric"], inplace=True)
 
-    # Show final table with new column
+    # Final display DataFrame
+    df_display = df.reset_index(drop=True)
+
+    # Show the updated table
     st.markdown(f"### 🍺 Prices for **{selected_beer}**")
-    st.table(df_display.reset_index(drop=True))
+    st.table(df_display)
 else:
     st.write("No price data available.")
