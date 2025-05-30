@@ -104,7 +104,8 @@ def scrape_costco(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
-        price_span = soup.find("span", class_="notranslate")
+        # Look for any span with kr. inside and extract the first match
+        price_span = soup.find("span", string=lambda text: text and "kr." in text)
         if price_span:
             full_pack_text = price_span.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
             full_pack_price = float(full_pack_text)
