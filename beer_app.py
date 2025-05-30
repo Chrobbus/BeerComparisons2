@@ -114,7 +114,7 @@ for entry in filtered_entries:
         url = entry["url"]
         unit_price = scrape_heimkaup(url)
         if unit_price is not None:
-            full_pack_price = unit_price * 12
+            full_pack_price = unit_price / 12
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
 # Display results
