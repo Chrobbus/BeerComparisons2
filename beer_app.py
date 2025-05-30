@@ -176,17 +176,25 @@ def scrape_desma(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
-        price_span = soup.find("span", class_="price-item--regular")
-        if price_span:
-            price_text = price_span.text.strip().replace("ISK", "").replace("kr.", "").replace("kr", "").replace(".", "").replace(",", ".")
-            full_pack_price = float(price_text)
-            unit_price = round(full_pack_price / 12, 2)
-            return full_pack_price, unit_price
-        return None, None
+        # Look for sale price first
+        sale_price_span = soup.find("span", class_="price-item price-item--sale price-item--last")
+        if sale_price_span and sale_price_span.text.strip():
+            price_text = sale_price_span.text.strip()
+        else:
+            price_span = soup.find("span", class_="price-item price-item--regular")
+            if not price_span or not price_span.text.strip():
+                return None, None
+            price_text = price_span.text.strip()
+
+        # Clean and convert
+        price_text = price_text.replace("ISK", "").replace("kr.", "").replace("kr", "").replace(".", "").replace(",", ".")
+        full_pack_price = float(price_text)
+        unit_price = round(full_pack_price / 12, 2)
+        return full_pack_price, unit_price
+
     except Exception as e:
         print(f"⚠️ Desma ERROR: {e}")
         return None, None
-
 
 # Filter entries for selected beer
 filtered_entries = [entry for entry in beer_entries if entry["name"] == selected_beer]
