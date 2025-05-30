@@ -84,12 +84,14 @@ def scrape_heimkaup(url):
 
         price_tag = soup.find("span", class_="Price")
         if price_tag:
-            price_text = price_tag.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
-            return float(price_text)
-        return None
+            full_pack_text = price_tag.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
+            full_pack_price = float(full_pack_text)
+            unit_price = round(full_pack_price / 12, 2)
+            return full_pack_price, unit_price
+        return None, None
     except Exception as e:
         print(f"⚠️ Heimkaup ERROR: {e}")
-        return None
+        return None, None
 
 # Filter entries for selected beer
 filtered_entries = [entry for entry in beer_entries if entry["name"] == selected_beer]
@@ -112,9 +114,8 @@ for entry in filtered_entries:
             data.append({"Store": store, "12-pack Price": f"{int(full_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
     elif store == "Heimkaup":
         url = entry["url"]
-        unit_price = scrape_heimkaup(url)
-        if unit_price is not None:
-            full_pack_price = unit_price / 12
+        full_pack_price, unit_price = scrape_heimkaup(url)
+        if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
 # Display results
