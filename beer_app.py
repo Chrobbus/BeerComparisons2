@@ -18,10 +18,8 @@ beer_entries = [
     {"name": "Gull Lite 330ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/gull-lite-4-4-12-x-330ml"},
     {"name": "Víking Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Viking-Lite-12-x-500ml/p/453945"},
     {"name": "Gull Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Gull-Lite-12-x-500ml/p/453613"},
-    {"name": "Gull Lite 500ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/gull-lite-500-ml-12pk-158102"},
-    {"name": "Gull Lite 330ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/gull-lite-330ml-12pk-158111"},
-    {"name": "Víking Lite 500ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/viking-lite-500-ml-12pk-157969"},
-    {"name": "Víking Lite 330ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/viking-lite-330-ml-12pk-157965"},
+    {"name": "Víking Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://veigar.eu/product/viking-lite-500ml/"},
+    {"name": "Gull Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://veigar.eu/product/gull-lite-500ml/"},
 ]
 
 # Dropdown to select beer
@@ -52,7 +50,7 @@ def scrape_nyjavinbudin(url):
         print(f"⚠️ Nýja Vínbúðin ERROR: {e}")
         return None
 
-# Scraper for Smáríkið using name matching (uses base_price if sale_price is missing or not lower)
+# Scraper for Smáríkið using name matching
 @st.cache_data
 def get_smarikid_price(product_name):
     try:
@@ -118,19 +116,23 @@ def scrape_costco(url):
         print(f"⚠️ Costco ERROR: {e}")
         return None, None
 
-# Scraper for Hagkaup (Veigar)
+# Scraper for Hagkaup (veigar.eu)
 def scrape_veigar(url):
     try:
-        response = requests.get(url)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
-        price_tag = soup.find("span", string=lambda text: text and "kr." in text)
-        if price_tag:
-            price_text = price_tag.text.strip().replace(".", "").replace("kr", "").replace(" ", "")
-            full_pack_price = int(price_text)
+
+        price_element = soup.find("bdi")
+        if price_element:
+            price_text = price_element.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
+            full_pack_price = float(price_text)
             unit_price = round(full_pack_price / 12, 2)
             return full_pack_price, unit_price
+        return None, None
     except Exception as e:
-        print(f"⚠️ Hagkaup ERROR: {e}")
+        print(f"⚠️ Veigar ERROR: {e}")
         return None, None
 
 # Filter entries for selected beer
@@ -162,7 +164,7 @@ for entry in filtered_entries:
         full_pack_price, unit_price = scrape_costco(url)
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
-    elif store == "Hagkaup":
+    elif store == "Hagkaup (veigar)":
         url = entry["url"]
         full_pack_price, unit_price = scrape_veigar(url)
         if full_pack_price is not None and unit_price is not None:
