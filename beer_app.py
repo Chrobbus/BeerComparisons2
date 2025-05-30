@@ -246,6 +246,30 @@ for entry in filtered_entries:
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
+# Only proceed if we have any price data
+if data:
+    # Convert to DataFrame
+    df = pd.DataFrame(data)
+
+    # Extract numeric value from "12-pack Price" column for comparison
+    df["12-pack Numeric"] = df["12-pack Price"].str.replace(" kr", "").str.replace(".", "").astype(int)
+
+    # Find the cheapest price
+    cheapest = df["12-pack Numeric"].min()
+
+    # Compare each price to the cheapest and format
+    df["Compared to Cheapest"] = df["12-pack Numeric"].apply(
+        lambda x: "Cheapest 🥇" if x == cheapest else f"+{int(round((x - cheapest) / cheapest * 100))}%"
+    )
+
+    # Drop the numeric helper column
+    df.drop(columns=["12-pack Numeric"], inplace=True)
+
+    # Show final table with new column
+    st.write(f"### 🍺 Prices for **{selected_beer}**")
+    st.table(df)
+else:
+    st.write("No price data available.")
 
 # Display results
 df = pd.DataFrame(data)
