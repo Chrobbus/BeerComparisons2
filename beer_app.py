@@ -273,7 +273,7 @@ if data:
     df.drop(columns=["12-pack Numeric"], inplace=True)
 
     # Show final table with new column
-    st.write(f"### 🍺 Prices for **{selected_beer}**")
+    st.markdown(f"### 🍺 Prices for **{selected_beer}**")
     st.table(df_display.reset_index(drop=True))
 else:
     st.write("No price data available.")
