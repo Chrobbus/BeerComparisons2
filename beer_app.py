@@ -274,6 +274,6 @@ if data:
 
     # Show final table with new column
     st.write(f"### 🍺 Prices for **{selected_beer}**")
-    st.table(df)
+    st.table(df_display.reset_index(drop=True))
 else:
     st.write("No price data available.")
