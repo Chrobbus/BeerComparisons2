@@ -26,6 +26,10 @@ beer_entries = [
     {"name": "Víking Lite 500ml", "store": "Santé", "url": "https://sante.is/products/viking-lite-50-cl-dos?_pos=8&_psq=lite&_ss=e&_v=1.0"},
     {"name": "Gull Lite 330ml", "store": "Santé", "url": "https://sante.is/products/gull-lite-12-i-rutu?_pos=3&_psq=lite&_ss=e&_v=1.0"},
     {"name": "Gull Lite 500ml", "store": "Santé", "url": "https://sante.is/products/gull-lite-12-ofurdosir-i-rutu?_pos=4&_psq=lite&_ss=e&_v=1.0"},
+    {"name": "Víking Lite 500ml", "store": "Desma", "url": "https://desma.is/products/viking-lite-500ml-4-4"},
+    {"name": "Gull Lite 500ml", "store": "Desma", "url": "https://desma.is/products/gull-lite-500ml?_pos=2&_psq=gull+lite&_ss=e&_v=1.0"},
+    {"name": "Gull Lite 330ml", "store": "Desma", "url": "https://desma.is/products/gull-lite-330ml?_pos=1&_psq=gull+lite+330&_ss=e&_v=1.0"},
+    {"name": "Víking Lite 330ml", "store": "Desma", "url": "https://desma.is/products/viking-lite-330ml-4-4?_pos=1&_psq=viking+lite+330&_ss=e&_v=1.0"},
 ]
 
 # Dropdown to select beer
@@ -164,6 +168,26 @@ def scrape_sante(url):
         print(f"⚠️ Santé ERROR: {e}")
         return None, None
 
+# Scraper for Desma
+def scrape_desma(url):
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        price_span = soup.find("span", class_="price-item--regular")
+        if price_span:
+            price_text = price_span.text.strip().replace("ISK", "").replace("kr.", "").replace("kr", "").replace(".", "").replace(",", ".")
+            full_pack_price = float(price_text)
+            unit_price = round(full_pack_price / 12, 2)
+            return full_pack_price, unit_price
+        return None, None
+    except Exception as e:
+        print(f"⚠️ Desma ERROR: {e}")
+        return None, None
+
+
 # Filter entries for selected beer
 filtered_entries = [entry for entry in beer_entries if entry["name"] == selected_beer]
 
@@ -201,6 +225,11 @@ for entry in filtered_entries:
     elif store == "Santé":
         url = entry["url"]
         full_pack_price, unit_price = scrape_sante(url)
+        if full_pack_price is not None and unit_price is not None:
+            data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
+elif store == "Desma":
+        url = entry["url"]
+        full_pack_price, unit_price = scrape_Desma(url)
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
