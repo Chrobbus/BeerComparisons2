@@ -227,7 +227,7 @@ for entry in filtered_entries:
         full_pack_price, unit_price = scrape_sante(url)
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
-elif store == "Desma":
+    elif store == "Desma":
         url = entry["url"]
         full_pack_price, unit_price = scrape_desma(url)
         if full_pack_price is not None and unit_price is not None:
