@@ -173,19 +173,28 @@ def scrape_desma(url):
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Find all price-item spans
-        price_spans = soup.find_all("span", class_="price-item")
-        for span in price_spans:
-            if span.text and "kr" in span.text:
-                price_text = span.text.strip()
-                price_text = price_text.replace("ISK", "").replace("kr.", "").replace("kr", "").replace(".", "").replace(",", ".")
-                full_pack_price = float(price_text)
-                unit_price = round(full_pack_price / 12, 2)
-                return full_pack_price, unit_price
+        # First try sale price
+        sale = soup.select_one("span.price-item--sale")
+        if sale and sale.text.strip():
+            price_text = sale.text.strip()
+        else:
+            # Fallback to regular price
+            regular = soup.select_one("span.price-item--regular")
+            if not regular or not regular.text.strip():
+                print("⚠️ No price found on Desma page")
+                return None, None
+            price_text = regular.text.strip()
 
-        return None, None
+        price_text = price_text.replace("kr.", "").replace("kr", "").replace("ISK", "").replace(".", "").replace(",", ".").strip()
+        full_pack_price = float(price_text)
+        unit_price = round(full_pack_price / 12, 2)
+
+        print(f"🧪 Desma scraped: {full_pack_price} ISK total / {unit_price} ISK per can")
+        return full_pack_price, unit_price
+
     except Exception as e:
         print(f"⚠️ Desma ERROR: {e}")
         return None, None
@@ -236,6 +245,7 @@ for entry in filtered_entries:
         print(f"🧪 Desma result: full={full_pack_price}, unit={unit_price}")
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
+
 
 # Display results
 df = pd.DataFrame(data)
