@@ -12,6 +12,10 @@ beer_entries = [
     {"name": "Víking Lite 500ml", "store": "Smáríkið", "query": "Víking Lite 500ml"},
     {"name": "Gull Lite 500ml", "store": "Smáríkið", "query": "Gull Lite"},
     {"name": "Víking Lite 330ml", "store": "Smáríkið", "query": "Víking Lite 330ml"},
+    {"name": "Víking Lite 500ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/viking-lite-0-5l-10pk-dos-afhendist-kaldur"},
+    {"name": "Víking Lite 330ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/viking-lite-4-4-12-x-330ml"},
+    {"name": "Gull Lite 500ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/gull-lite-4-4-12-x-500ml"},
+    {"name": "Gull Lite 330ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/gull-lite-4-4-12-x-330ml"},
 ]
 
 # Dropdown to select beer
@@ -70,6 +74,23 @@ def get_smarikid_price(product_name):
         print(f"⚠️ Smáríkið API ERROR: {e}")
         return None, None
 
+# Scraper for Heimkaup
+def scrape_heimkaup(url):
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        price_tag = soup.find("span", class_="Price")
+        if price_tag:
+            price_text = price_tag.text.strip().replace("kr.", "").replace(".", "").replace(",", ".")
+            return float(price_text)
+        return None
+    except Exception as e:
+        print(f"⚠️ Heimkaup ERROR: {e}")
+        return None
+
 # Filter entries for selected beer
 filtered_entries = [entry for entry in beer_entries if entry["name"] == selected_beer]
 
@@ -89,6 +110,12 @@ for entry in filtered_entries:
         full_price, unit_price = get_smarikid_price(product_name)
         if full_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
+    elif store == "Heimkaup":
+        url = entry["url"]
+        unit_price = scrape_heimkaup(url)
+        if unit_price is not None:
+            full_pack_price = unit_price * 12
+            data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
 # Display results
 df = pd.DataFrame(data)
