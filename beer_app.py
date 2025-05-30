@@ -235,6 +235,7 @@ for entry in filtered_entries:
     elif store == "Desma":
         url = entry["url"]
         full_pack_price, unit_price = scrape_desma(url)
+        print(f"🧪 Checking Desma for {selected_beer}: {full_pack_price}, {unit_price}")
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
