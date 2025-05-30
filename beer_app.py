@@ -164,7 +164,7 @@ for entry in filtered_entries:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
     elif store == "Hagkaup":
         url = entry["url"]
-        full_pack_price, unit_price = scrape_veigar(url)
+        full_pack_price, unit_price = scrape_hagkaup(url)
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
