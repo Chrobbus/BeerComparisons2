@@ -175,20 +175,17 @@ def scrape_desma(url):
         response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        sale_price = soup.find("span", class_="price-item price-item--sale price-item--last")
-        if sale_price and sale_price.text.strip():
-            price_text = sale_price.text.strip()
-        else:
-            regular_price = soup.find("span", class_="price-item price-item--regular")
-            if not regular_price or not regular_price.text.strip():
-                return None, None
-            price_text = regular_price.text.strip()
+        # Find all price-item spans
+        price_spans = soup.find_all("span", class_="price-item")
+        for span in price_spans:
+            if span.text and "kr" in span.text:
+                price_text = span.text.strip()
+                price_text = price_text.replace("ISK", "").replace("kr.", "").replace("kr", "").replace(".", "").replace(",", ".")
+                full_pack_price = float(price_text)
+                unit_price = round(full_pack_price / 12, 2)
+                return full_pack_price, unit_price
 
-        price_text = price_text.replace("ISK", "").replace("kr.", "").replace("kr", "").replace(".", "").replace(",", ".")
-        full_pack_price = float(price_text)
-        unit_price = round(full_pack_price / 12, 2)
-        return full_pack_price, unit_price
-
+        return None, None
     except Exception as e:
         print(f"⚠️ Desma ERROR: {e}")
         return None, None
@@ -234,7 +231,9 @@ for entry in filtered_entries:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
     elif store == "Desma":
         url = entry["url"]
+        print(f"🔍 Scraping Desma URL: {url}")
         full_pack_price, unit_price = scrape_desma(url)
+        print(f"🧪 Desma result: full={full_pack_price}, unit={unit_price}")
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
 
