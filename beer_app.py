@@ -256,6 +256,8 @@ if data:
     # Convert to DataFrame
     df = pd.DataFrame(data)
 
+    df = df.sort_values(by="12-pack Price")
+
     # Extract numeric value from "12-pack Price" column for comparison
     df["12-pack Numeric"] = df["12-pack Price"].str.replace(" kr", "").str.replace(".", "").astype(int)
 
@@ -269,8 +271,6 @@ if data:
 
     # Drop the numeric helper column
     df.drop(columns=["12-pack Numeric"], inplace=True)
-
-    df = df.sort_values(by="12-pack Numeric")
 
     # Show final table with new column
     st.write(f"### 🍺 Prices for **{selected_beer}**")
