@@ -3,6 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
+st.set_page_config(page_title="Beer Price Comparison", page_icon="🍺", layout="centered")
+
+st.title("🍺 Gull & Viking Lite Price Comparison ")
+st.caption("Real-time comparison from Icelandic Online Liquor Stores")
+
 # List of beers across stores
 beer_entries = [
     {"name": "Víking Lite 500ml", "store": "Nýja Vínbúðin", "url": "https://nyjavinbudin.is/vara/viking-lite/"},
@@ -264,6 +269,8 @@ if data:
 
     # Drop the numeric helper column
     df.drop(columns=["12-pack Numeric"], inplace=True)
+
+    df = df.sort_values(by="12-pack Numeric")
 
     # Show final table with new column
     st.write(f"### 🍺 Prices for **{selected_beer}**")
