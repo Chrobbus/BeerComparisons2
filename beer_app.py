@@ -18,8 +18,10 @@ beer_entries = [
     {"name": "Gull Lite 330ml", "store": "Heimkaup", "url": "https://www.heimkaup.is/gull-lite-4-4-12-x-330ml"},
     {"name": "Víking Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Viking-Lite-12-x-500ml/p/453945"},
     {"name": "Gull Lite 500ml", "store": "Costco", "url": "https://www.costco.is/Alcohol-Click-Collect/Gull-Lite-12-x-500ml/p/453613"},
-    {"name": "Víking Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://www.veigar.eu/vara/viking-lite-500-ml-12pk-157969"},
-    {"name": "Gull Lite 500ml", "store": "Hagkaup (veigar)", "url": "https://www.veigar.eu/vara/gull-lite-500-ml-12pk-157967"},
+    {"name": "Víking Lite 500ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/viking-lite-500-ml-12pk-157969"},
+    {"name": "Gull Lite 500ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/gull-lite-500-ml-12pk-157967"},
+    {"name": "Víking Lite 330ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/viking-lite-330ml-12pk"},
+    {"name": "Gull Lite 330ml", "store": "Hagkaup", "url": "https://www.veigar.eu/vara/gull-lite-330ml-12pk"},
 ]
 
 # Dropdown to select beer
@@ -168,7 +170,7 @@ for entry in filtered_entries:
         full_pack_price, unit_price = scrape_costco(url)
         if full_pack_price is not None and unit_price is not None:
             data.append({"Store": store, "12-pack Price": f"{int(full_pack_price)} kr", "Unit Price": f"{int(unit_price)} kr"})
-    elif store == "Hagkaup (veigar)":
+    elif store == "Hagkaup":
         url = entry["url"]
         full_pack_price, unit_price = scrape_veigar(url)
         if full_pack_price is not None and unit_price is not None:
